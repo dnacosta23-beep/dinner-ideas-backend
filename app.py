@@ -19,12 +19,28 @@ def home():
 @app.route("/meals")
 def get_meals():
     meals = []
+    seen_meals = set()
 
-    for _ in range(10):
+    excluded_categories = {
+        "Breakfast",
+        "Dessert",
+        "Starter",
+        "Side",
+    }
+
+    while len(meals) < 10:
         response = requests.get(MEAL_API, timeout=10)
         response.raise_for_status()
 
         meal = response.json()["meals"][0]
+
+        if meal["strCategory"] in excluded_categories:
+            continue
+
+        if meal["idMeal"] in seen_meals:
+            continue
+
+        seen_meals.add(meal["idMeal"])
 
         meals.append(
             {
